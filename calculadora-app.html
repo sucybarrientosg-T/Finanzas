@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0D47A1">
+<title>Calculadora · Sucelly & Pablo</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --blue:       #0D47A1;
+    --blue-mid:   #1565C0;
+    --blue-light: #E3F2FD;
+    --purple:     #4A148C;
+    --purple-mid: #6A1B9A;
+    --purple-light:#EDE7F6;
+    --purple-text: #3C0065;
+    --teal:       #006064;
+    --teal-light: #E0F7FA;
+    --teal-text:  #004D40;
+    --amber:      #E65100;
+    --amber-light:#FFF3E0;
+    --green:      #1B5E20;
+    --green-light:#E8F5E9;
+    --radius:     16px;
+    --radius-sm:  10px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body { min-height: 100vh; background: #ECEFF1; font-family: 'DM Sans', sans-serif; color: #212121; }
+
+  .app { max-width: 430px; margin: 0 auto; min-height: 100vh; display: flex; flex-direction: column; }
+
+  /* Header */
+  .header { background: var(--blue); padding: 52px 20px 24px; }
+  .header h1 { font-size: 22px; font-weight: 600; color: #fff; letter-spacing: -0.4px; }
+  .header p  { font-size: 13px; color: rgba(255,255,255,0.6); margin-top: 3px; }
+  .pct-chips { display: flex; gap: 8px; margin-top: 14px; }
+  .pct-chip  { padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 600; }
+  .pc-s { background: rgba(255,255,255,0.15); color: #fff; }
+  .pc-p { background: rgba(255,255,255,0.1);  color: rgba(255,255,255,0.8); }
+
+  /* Body */
+  .body { flex: 1; padding: 16px; }
+
+  /* Card */
+  .card { background: #fff; border-radius: var(--radius); padding: 18px; margin-bottom: 12px; border: 1px solid rgba(0,0,0,0.06); }
+  .card-label { font-size: 11px; font-weight: 600; color: #9E9E9E; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 12px; }
+
+  /* Monto input grande */
+  .monto-big-wrap { position: relative; margin-bottom: 6px; }
+  .monto-prefix { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); font-size: 22px; font-weight: 600; color: #BDBDBD; pointer-events: none; }
+  .monto-big { width: 100%; padding: 18px 16px 18px 38px; border-radius: var(--radius-sm); border: 2px solid #E3F2FD; background: #F8FBFF; color: #0D47A1; font-size: 28px; font-weight: 600; font-family: 'DM Sans', sans-serif; appearance: none; outline: none; transition: border-color 0.15s; }
+  .monto-big:focus { border-color: var(--blue-mid); background: #fff; }
+  .monto-big::placeholder { color: #BDBDBD; font-weight: 400; }
+  .hint { font-size: 12px; color: #9E9E9E; text-align: center; }
+
+  /* Resultado cards */
+  .result-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-bottom: 12px; }
+  .result-card { border-radius: var(--radius); padding: 16px; text-align: center; transition: transform 0.1s; }
+  .result-card:active { transform: scale(0.97); }
+  .rc-sucelly { background: var(--purple-light); }
+  .rc-pablo   { background: var(--blue-light); }
+  .rc-name    { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px; }
+  .rc-name-s  { color: var(--purple-mid); }
+  .rc-name-p  { color: var(--blue-mid); }
+  .rc-pct     { font-size: 12px; margin-bottom: 8px; }
+  .rc-pct-s   { color: #9C27B0; }
+  .rc-pct-p   { color: #1976D2; }
+  .rc-amount  { font-size: 26px; font-weight: 600; letter-spacing: -0.5px; }
+  .rc-amt-s   { color: var(--purple-text); }
+  .rc-amt-p   { color: var(--blue); }
+
+  /* Total card */
+  .total-row { display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; background: var(--green-light); border-radius: var(--radius-sm); margin-bottom: 12px; }
+  .total-label { font-size: 13px; font-weight: 600; color: var(--green); }
+  .total-value { font-size: 20px; font-weight: 600; color: var(--green); }
+
+  /* Diferencia */
+  .dif-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: var(--amber-light); border-radius: var(--radius-sm); margin-bottom: 12px; }
+  .dif-label { font-size: 12px; color: var(--amber); font-weight: 500; flex: 1; }
+  .dif-value { font-size: 14px; font-weight: 600; color: var(--amber); margin-left: 8px; flex-shrink: 0; }
+
+  /* Historial */
+  .hist-item { display: flex; align-items: center; padding: 10px 0; border-bottom: 1px solid #F5F5F5; gap: 10px; }
+  .hist-item:last-child { border-bottom: none; }
+  .hist-desc { flex: 1; min-width: 0; }
+  .hist-desc-main { font-size: 14px; font-weight: 500; color: #212121; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .hist-desc-sub  { font-size: 11px; color: #9E9E9E; margin-top: 2px; }
+  .hist-amounts { text-align: right; flex-shrink: 0; }
+  .hist-suc { font-size: 12px; color: var(--purple-mid); font-weight: 500; }
+  .hist-pab { font-size: 12px; color: var(--blue-mid); font-weight: 500; }
+
+  /* Botón limpiar */
+  .clear-btn { width: 100%; padding: 14px; border-radius: var(--radius); border: 1.5px solid #E0E0E0; background: #fff; color: #9E9E9E; font-size: 14px; font-weight: 500; font-family: 'DM Sans', sans-serif; cursor: pointer; margin-top: 4px; transition: all 0.15s; }
+  .clear-btn:active { background: #F5F5F5; }
+
+  /* Add to history btn */
+  .add-btn { width: 100%; padding: 14px; border-radius: var(--radius); background: var(--blue); color: #fff; font-size: 15px; font-weight: 600; font-family: 'DM Sans', sans-serif; border: none; cursor: pointer; margin-bottom: 8px; transition: opacity 0.15s; }
+  .add-btn:active { opacity: 0.8; }
+  .add-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+  /* Descripcion input */
+  .desc-input { width: 100%; padding: 11px 14px; border-radius: var(--radius-sm); border: 1.5px solid #E8E8E8; background: #FAFAFA; color: #212121; font-size: 14px; font-family: 'DM Sans', sans-serif; outline: none; transition: border-color 0.15s; margin-bottom: 10px; }
+  .desc-input:focus { border-color: var(--blue-mid); background: #fff; }
+
+  .empty-hist { text-align: center; padding: 16px 0 4px; }
+  .empty-hist p { font-size: 13px; color: #BDBDBD; }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="header">
+    <h1>Calculadora proporcional</h1>
+    <p>Sucelly &amp; Pablo · Reparto automático</p>
+    <div class="pct-chips">
+      <span class="pct-chip pc-s">Sucelly 37%</span>
+      <span class="pct-chip pc-p">Pablo 63%</span>
+    </div>
+  </div>
+
+  <div class="body">
+
+    <!-- Input monto -->
+    <div class="card">
+      <div class="card-label">¿Cuánto es el gasto?</div>
+      <div class="monto-big-wrap">
+        <span class="monto-prefix">Q</span>
+        <input type="number" class="monto-big" id="monto" placeholder="0.00" min="0" step="0.01" inputmode="decimal" oninput="calcular()">
+      </div>
+      <p class="hint">Ingresa el monto total y el reparto aparece al instante</p>
+    </div>
+
+    <!-- Resultados -->
+    <div class="result-grid">
+      <div class="result-card rc-sucelly">
+        <div class="rc-name rc-name-s">Sucelly</div>
+        <div class="rc-pct rc-pct-s">37% del total</div>
+        <div class="rc-amount rc-amt-s" id="res-sucelly">Q0.00</div>
+      </div>
+      <div class="result-card rc-pablo">
+        <div class="rc-name rc-name-p">Pablo</div>
+        <div class="rc-pct rc-pct-p">63% del total</div>
+        <div class="rc-amount rc-amt-p" id="res-pablo">Q0.00</div>
+      </div>
+    </div>
+
+    <!-- Total -->
+    <div class="total-row">
+      <span class="total-label">Total del gasto</span>
+      <span class="total-value" id="res-total">Q0.00</span>
+    </div>
+
+    <!-- Diferencia -->
+    <div class="dif-row">
+      <span class="dif-label" id="dif-label">Pablo pone Q0.00 más que Sucelly</span>
+    </div>
+
+    <!-- Guardar en historial -->
+    <div class="card">
+      <div class="card-label">Agregar al historial de la sesión</div>
+      <input type="text" class="desc-input" id="descripcion" placeholder="Ej. Supermercado, gasolina, luz...">
+      <button class="add-btn" id="add-btn" onclick="agregarHistorial()" disabled>
+        + Guardar en historial
+      </button>
+      <button class="clear-btn" onclick="limpiar()">Limpiar calculadora</button>
+    </div>
+
+    <!-- Historial -->
+    <div class="card" id="hist-card" style="display:none">
+      <div class="card-label">Historial de esta sesión</div>
+      <div id="historial">
+        <div class="empty-hist"><p>Aún no hay cálculos guardados</p></div>
+      </div>
+      <div id="hist-totales" style="display:none;margin-top:12px;padding-top:12px;border-top:1px solid #F5F5F5">
+        <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+          <span style="font-size:13px;color:#9C27B0;font-weight:500">Total Sucelly</span>
+          <span style="font-size:14px;font-weight:600;color:#4A148C" id="tot-suc">Q0.00</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+          <span style="font-size:13px;color:#1976D2;font-weight:500">Total Pablo</span>
+          <span style="font-size:14px;font-weight:600;color:#0D47A1" id="tot-pab">Q0.00</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding-top:8px;border-top:1px solid #F5F5F5">
+          <span style="font-size:13px;color:#1B5E20;font-weight:600">Gran total</span>
+          <span style="font-size:15px;font-weight:600;color:#1B5E20" id="tot-all">Q0.00</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  const PCT_S = 0.37;
+  const PCT_P = 0.63;
+  let historial = [];
+
+  function fmt(n) {
+    return "Q" + n.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  }
+
+  function calcular() {
+    const raw = parseFloat(document.getElementById("monto").value) || 0;
+    const suc = raw * PCT_S;
+    const pab = raw * PCT_P;
+    const dif = Math.abs(pab - suc);
+
+    document.getElementById("res-sucelly").textContent = fmt(suc);
+    document.getElementById("res-pablo").textContent   = fmt(pab);
+    document.getElementById("res-total").textContent   = fmt(raw);
+    document.getElementById("dif-label").textContent   =
+      raw === 0 ? "Ingresa un monto para ver la diferencia"
+      : `Pablo pone ${fmt(dif)} más que Sucelly`;
+
+    document.getElementById("add-btn").disabled = raw <= 0;
+  }
+
+  function agregarHistorial() {
+    const raw  = parseFloat(document.getElementById("monto").value) || 0;
+    if (raw <= 0) return;
+    const desc = document.getElementById("descripcion").value.trim() || "Sin descripción";
+    const suc  = raw * PCT_S;
+    const pab  = raw * PCT_P;
+
+    historial.push({ desc, total: raw, suc, pab });
+    renderHistorial();
+
+    document.getElementById("monto").value = "";
+    document.getElementById("descripcion").value = "";
+    calcular();
+  }
+
+  function renderHistorial() {
+    const card = document.getElementById("hist-card");
+    const cont = document.getElementById("historial");
+    const tots = document.getElementById("hist-totales");
+    card.style.display = "block";
+
+    if (!historial.length) {
+      cont.innerHTML = '<div class="empty-hist"><p>Aún no hay cálculos guardados</p></div>';
+      tots.style.display = "none";
+      return;
+    }
+
+    cont.innerHTML = historial.map((r, i) => `
+      <div class="hist-item">
+        <div class="hist-desc">
+          <div class="hist-desc-main">${r.desc}</div>
+          <div class="hist-desc-sub">Total: ${fmt(r.total)}</div>
+        </div>
+        <div class="hist-amounts">
+          <div class="hist-suc">Suc: ${fmt(r.suc)}</div>
+          <div class="hist-pab">Pab: ${fmt(r.pab)}</div>
+        </div>
+      </div>
+    `).join("");
+
+    const totSuc = historial.reduce((a, r) => a + r.suc, 0);
+    const totPab = historial.reduce((a, r) => a + r.pab, 0);
+    const totAll = historial.reduce((a, r) => a + r.total, 0);
+    document.getElementById("tot-suc").textContent = fmt(totSuc);
+    document.getElementById("tot-pab").textContent = fmt(totPab);
+    document.getElementById("tot-all").textContent = fmt(totAll);
+    tots.style.display = "block";
+  }
+
+  function limpiar() {
+    document.getElementById("monto").value = "";
+    document.getElementById("descripcion").value = "";
+    calcular();
+  }
+</script>
+</body>
+</html>
