@@ -21,7 +21,6 @@
   .card { background:#fff; border-radius:var(--radius); padding:16px; margin-bottom:12px; border:1px solid rgba(0,0,0,0.06); }
   .card-label { font-size:11px; font-weight:600; color:#9E9E9E; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:12px; }
 
-  /* Botones táctiles — divs con touchstart para Android */
   .btn-grid-3 { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
   .btn-grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
   .sel-btn {
@@ -157,6 +156,7 @@
 
 <script>
 const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbzJdUcMjBpW1tRv9VFZ0ljeDLaqknkkyIwfWUh99eEkgmGdAzo-t8SCnl8Yd19DWH4sHA/exec";
+const TOKEN = "FinanzasSP2026";
 
 const CATS = {
   Ingreso: ["Salario","Bono","Otro"],
@@ -167,7 +167,6 @@ const CATS = {
 const MESES = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
 let persona = null, tipo = null, historial = [];
 
-// Fecha de hoy
 const hoy = new Date();
 document.getElementById("fecha").value = hoy.toISOString().split("T")[0];
 
@@ -187,7 +186,6 @@ function selTipo(el) {
   const cls = tipo==="Ingreso"?"act-ingreso": tipo==="Gasto"?"act-gasto":"act-ahorro";
   el.classList.add(cls);
 
-  // Actualizar categorías inmediatamente
   const sel = document.getElementById("categoria");
   sel.innerHTML = CATS[tipo].map(c => `<option value="${c}">${c}</option>`).join("");
 }
@@ -249,7 +247,8 @@ async function enviar() {
     persona, tipo, categoria: cat,
     descripcion: desc,
     monto: parseFloat(monto).toFixed(2),
-    observaciones: obs
+    observaciones: obs,
+    token: TOKEN
   };
 
   try {
